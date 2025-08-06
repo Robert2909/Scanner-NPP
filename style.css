@@ -151,3 +151,26 @@ ul li {
   margin-bottom: 6px;
   line-height: 1.4;
 }
+
+.resultado-categoria {
+  color: var(--highlight);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.resultado-puntaje {
+  font-weight: bold;
+}
+
+.estado-aprobado {
+  color: #4caf50; /* verde */
+}
+
+.estado-parcial {
+  color: #ffc107; /* amarillo */
+}
+
+.estado-fallo {
+  color: #f44336; /* rojo */
+}
