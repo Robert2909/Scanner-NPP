@@ -1,403 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Scanner NPP</title>
+  <title>Scanner NPP | Diagnóstico de Productos</title>
+
+  <!-- SEO & Icons -->
+  <meta name="description" content="Scanner profesional para validación de productos ganadores en TikTok Shop." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    /* ===== Visual Studio Code–like Dark Theme (near-black + blue accent) ===== */
-    :root{
-      --bg:#1e1e1e;          /* workbench.background */
-      --panel:#252526;        /* editorGroupHeader.tabsBackground */
-      --panel-2:#1f1f1f;      /* sideBar.background */
-      --text:#d4d4d4;         /* editor.foreground */
-      --muted:#9da1a6;        /* descriptionForeground */
-      --border:#2d2d2d;       /* contrastBorder-ish */
-      --accent:#007acc;       /* VS Code blue */
-      --ring:rgba(0,122,204,.35);
-      --green:#89d185;        /* success */
-      --yellow:#dcdcaa;       /* warning */
-      --red:#f14c4c;          /* danger */
-      --radius:14px;
-      --shadow:0 10px 28px rgba(0,0,0,.45);
-      --shadow-soft:0 8px 22px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    .wrap{max-width:980px; margin:28px auto 80px; padding:0 16px}
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
 
-    /* Header */
-    .header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
-    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px}
-    .brand .mark{width:12px; height:12px; border-radius:2px; background:var(--accent); box-shadow:0 0 0 4px rgba(0,122,204,.12)}
-
-    /* Card */
-    .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-soft)}
-    .card-pad{padding:18px}
-
-    /* Progress */
-    .progress{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-    .progress .label{font-size:12px; color:var(--muted)}
-    .bar{height:8px; flex:1; background:#1b1b1b; border:1px solid var(--border); border-radius:999px; overflow:hidden}
-    .fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#3594d8)}
-
-    /* Form */
-    form h3{margin:0 0 8px; font-size:16px}
-    form label.top{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
-    input[type="text"], input[type="number"]{width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--panel-2); color:var(--text); font-weight:700; outline:none}
-    input[type="text"]:focus, input[type="number"]:focus{border-color:transparent; box-shadow:0 0 0 4px var(--ring)}
-
-    /* Question block */
-    .q{padding:14px; background:var(--panel-2); border:1px solid var(--border); border-radius:12px; margin:12px 0}
-    .q p{margin:0 0 10px; font-weight:600}
-
-    /* Options */
-    .opts{display:grid; gap:8px}
-    .opt{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:linear-gradient(0deg,rgba(255,255,255,.02),rgba(255,255,255,0)); cursor:pointer}
-    .opt input{appearance:none; width:16px; height:16px; border-radius:50%; border:2px solid #5a5f66; display:inline-block; position:relative}
-    .opt input:checked{border-color:var(--accent); background:radial-gradient(circle at 50% 50%, var(--accent) 45%, transparent 46%)}
-    .opt span{flex:1}
-
-    /* Actions */
-    .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px}
-    .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; color:var(--text); font-weight:800; cursor:pointer; background:linear-gradient(0deg,rgba(255,255,255,.02),rgba(255,255,255,0))}
-    .btn:hover{background:rgba(0,122,204,.12)}
-
-    /* Result styles */
-    .result{display:flex; flex-direction:column; gap:14px}
-    .title{font-size:18px; font-weight:800; text-align:center}
-    .section{padding:16px; border:1px solid var(--border); border-radius:12px; background:var(--panel)}
-    .section h4{margin:0 0 8px; font-size:14px; color:#c8c8c8}
-
-    .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#1b1b1b; font-size:12px; font-weight:800}
-    .is-green{color:var(--green); border-color:rgba(137,209,133,.3); background:rgba(137,209,133,.08)}
-    .is-yellow{color:var(--yellow); border-color:rgba(220,220,170,.25); background:rgba(220,220,170,.08)}
-    .is-red{color:var(--red); border-color:rgba(241,76,76,.25); background:rgba(241,76,76,.08)}
-
-    .kpi{display:flex; align-items:center; gap:8px; font-weight:700; color:var(--muted)}
-
-    .feedback{margin-top:10px; padding:12px; border:1px dashed var(--border); border-radius:10px; background:var(--panel-2); white-space:pre-wrap}
-
-    .conclusion{padding:14px 16px; border:1px dashed var(--border); border-radius:12px; background:var(--panel-2); font-weight:800}
-
-    /* Container for dynamic mount */
-    #scanner{min-height:320px}
-  </style>
+  <!-- External Libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+
 <body>
+
   <div class="wrap">
     <header class="header">
-      <div class="brand"><span class="mark"></span><span>Scanner NPP</span></div>
+      <div class="brand">Scanner NPP</div>
     </header>
 
-    <section class="card">
+    <main class="card">
       <div class="card-pad">
-        <div class="progress" aria-label="Progreso">
-          <span class="label" id="progressLabel">Paso 1 de 3</span>
-          <div class="bar"><div class="fill" id="progressFill"></div></div>
+        <div class="progress-container">
+          <div class="progress-label">
+            <span id="progressLabel">Paso 1 de 3</span>
+            <span>Progreso</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
         </div>
-        <div id="scanner"></div>
+
+        <div id="scanner">
+          <!-- El contenido se genera dinámicamente con script.js -->
+        </div>
       </div>
-    </section>
+    </main>
   </div>
 
-  <script>
-  // ===== Data (adaptado del original) =====
-  const preguntas = [
-    {
-      titulo: "Sección 1 - Nicho",
-      clave: "nicho",
-      items: [
-        ["¿Tiene una comunidad con intereses claros?", ["Sí", "No"], [1, 0]],
-        ["¿Es un nicho con alta recompra?", ["Alta", "Media", "Baja"], [1, 0.5, 0]],
-        ["¿Se encuentra poco saturado en TikTok?", ["Poco saturado", "Saturado", "Muy saturado"], [1, 0.5, 0]],
-        ["¿Puedes conectarte emocionalmente con ese nicho?", ["Sí", "No"], [1, 0]]
-      ]
-    },
-    {
-      titulo: "Sección 2 - Producto deseable",
-      clave: "producto",
-      items: [
-        ["¿Resuelve un problema específico o urgente?", ["Sí", "No"], [1, 0]],
-        ["¿Se puede demostrar fácilmente en video?", ["Muy visual", "Poco visual", "Nada visual"], [1, 0.5, 0]],
-        ["¿Tiene un efecto WOW o factor viral?", ["Sí", "No"], [1, 0]],
-        ["¿Es de compra impulsiva (menos de $600)?", ["Sí", "No"], [1, 0]],
-        ["¿Tiene alta posibilidad de recompra o venta cruzada?", ["Sí", "No"], [1, 0]]
-      ]
-    },
-    {
-      titulo: "Sección - Proveedor rentable",
-      clave: "proveedor",
-      items: [
-        ["¿El proveedor acepta pago contra entrega o dropshipping?", ["Sí", "No"], [1, 0]],
-        ["¿El costo del producto permite un margen del 40% o más?", ["Sí", "No"], [1, 0]],
-        ["¿El proveedor ya tiene logística automatizada?", ["Sí", "No"], [1, 0]],
-        ["¿El envío no supera los $100 MXN y es nacional?", ["Sí", "No"], [1, 0]],
-        ["¿Tiene buenas reseñas o pruebas de cumplimiento?", ["Sí", "No"], [1, 0]]
-      ]
-    }
-  ];
+  <div id="errorMsg" class="error-message">
+    <span>⚠️</span>
+    <span id="errorText">Por favor, responde todas las preguntas.</span>
+  </div>
 
-  const retroalimentacion = {
-    "¿Tiene una comunidad con intereses claros?": {
-      "Sí": "El producto está asociado a una comunidad bien definida, lo cual facilita la segmentación y el engagement.",
-      "No": "Este producto no tiene una comunidad clara, lo que complica su posicionamiento y dificulta la creación de contenido relevante."
-    },
-    "¿Es un nicho con alta recompra?": {
-      "Alta": "El nicho tiene alto potencial de recompra, lo cual maximiza el valor por cliente.",
-      "Media": "Aunque hay recompra moderada, podrías complementar con ventas cruzadas para mejorar el rendimiento.",
-      "Baja": "Este nicho presenta baja recompra, lo que puede exigir más inversión publicitaria para sostener el crecimiento."
-    },
-    "¿Se encuentra poco saturado en TikTok?": {
-      "Poco saturado": "El nicho tiene baja saturación en TikTok, lo que representa una excelente oportunidad para destacarte.",
-      "Saturado": "El nivel de saturación es alto. Necesitarás creatividad y diferenciación para competir.",
-      "Muy saturado": "El mercado está altamente saturado en TikTok, lo cual reduce la efectividad del contenido y eleva los costos de adquisición."
-    },
-    "¿Puedes conectarte emocionalmente con ese nicho?": {
-      "Sí": "Existe una conexión personal con el nicho, lo que favorece la creación de contenido auténtico y resonante.",
-      "No": "La falta de conexión emocional con el nicho puede dificultar la empatía y la comunicación efectiva del valor del producto."
-    },
-    "¿Resuelve un problema específico o urgente?": {
-      "Sí": "Este producto aborda una necesidad clara, lo que mejora la tasa de conversión y facilita la venta directa.",
-      "No": "No hay una urgencia evidente asociada al producto, lo que puede requerir una estrategia de branding o storytelling más elaborada."
-    },
-    "¿Se puede demostrar fácilmente en video?": {
-      "Muy visual": "El producto es altamente visual y demostrativo, perfecto para captar atención en formatos como TikTok.",
-      "Poco visual": "El producto tiene poca capacidad de demostración. Tendrás que ser creativo para comunicar su valor visualmente.",
-      "Nada visual": "No es un producto demostrativo, lo que dificulta su viralización y reduce su atractivo en contenido visual."
-    },
-    "¿Tiene un efecto WOW o factor viral?": {
-      "Sí": "Tiene un efecto wow o elemento viral que puede impulsar el alcance orgánico y el interés inmediato.",
-      "No": "Carece de un factor de impacto inmediato. Será necesario compensarlo con contenido creativo o testimonios potentes."
-    },
-    "¿Es de compra impulsiva (menos de $600)?": {
-      "Sí": "El precio bajo lo convierte en una compra impulsiva ideal para el comportamiento de los usuarios en TikTok.",
-      "No": "El precio elevado requiere más validación, pruebas sociales o confianza en la marca para lograr conversión."
-    },
-    "¿Tiene alta posibilidad de recompra o venta cruzada?": {
-      "Sí": "Tiene buen potencial para recompra o venta cruzada, lo que favorece un ciclo de vida rentable por cliente.",
-      "No": "La recompra es limitada. Considera ofrecer bundles, accesorios o versiones complementarias."
-    },
-    "¿El proveedor acepta pago contra entrega o dropshipping?": {
-      "Sí": "El proveedor ofrece modelos de bajo riesgo como pago contra entrega o dropshipping. Ideal para escalar sin capital.",
-      "No": "Este proveedor requiere inversión inicial o riesgo financiero, lo que puede limitar el volumen de prueba."
-    },
-    "¿El costo del producto permite un margen del 40% o más?": {
-      "Sí": "El margen de ganancia es saludable, lo que permite absorber comisiones y costos publicitarios sin comprometer rentabilidad.",
-      "No": "El margen es insuficiente. Necesitas renegociar precios, ajustar el precio de venta o reducir costos para que sea viable."
-    },
-    "¿El proveedor ya tiene logística automatizada?": {
-      "Sí": "La logística automatizada ahorra tiempo y reduce errores operativos, facilitando la escalabilidad.",
-      "No": "Al no contar con logística automatizada, tendrás que asumir la carga operativa y eso puede frenar el crecimiento."
-    },
-    "¿El envío no supera los $100 MXN y es nacional?": {
-      "Sí": "El costo de envío es competitivo y mejora la conversión al no ser una barrera de entrada.",
-      "No": "El envío nacional es costoso, lo que puede afectar tanto la percepción del producto como tu margen final."
-    },
-    "¿Tiene buenas reseñas o pruebas de cumplimiento?": {
-      "Sí": "El proveedor tiene historial comprobado, lo que genera confianza y disminuye las tasas de devolución.",
-      "No": "No hay garantías claras sobre cumplimiento. Esto puede afectar la reputación del producto y aumentar las reclamaciones."
-    }
-  };
-
-  // ===== State =====
-  let pagina = 0;
-  let puntajes = { nicho: [], producto: [], proveedor: [] };
-  let respuestas = [];
-  let nombreProducto = "";
-
-  const contenedor = document.getElementById("scanner");
-  const progressFill = document.getElementById('progressFill');
-  const progressLabel = document.getElementById('progressLabel');
-
-  function setProgress(){
-    const pct = (pagina / preguntas.length) * 100; // before rendering the page
-    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
-    progressLabel.textContent = `Paso ${Math.min(pagina+1, preguntas.length)} de ${preguntas.length}`;
-  }
-
-  function crearOpcion(name, valor, texto, onpick){
-    const label = document.createElement('label');
-    label.className = 'opt';
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = name;
-    input.value = valor;
-    input.addEventListener('change', ()=> onpick(parseFloat(valor)));
-    const span = document.createElement('span');
-    span.textContent = texto;
-    label.appendChild(input); label.appendChild(span);
-    return label;
-  }
-
-  function cargarPagina(){
-    contenedor.innerHTML = '';
-    setProgress();
-
-    const seccion = preguntas[pagina];
-    const form = document.createElement('form');
-
-    // Header de sección
-    const h2 = document.createElement('h3');
-    h2.textContent = seccion.titulo;
-    form.appendChild(h2);
-
-    // Campo de nombre en la primera página
-    if(pagina === 0){
-      const label = document.createElement('label');
-      label.className = 'top';
-      label.textContent = 'Nombre del producto';
-      const input = document.createElement('input');
-      input.value = 'Audífonos inalámbricos';
-      input.type = 'text';
-      input.required = true; input.id = 'nombreProducto';
-      form.appendChild(label); form.appendChild(input);
-    }
-
-    respuestas = [];
-
-    seccion.items.forEach(([pregunta, opciones, valores], i)=>{
-      const block = document.createElement('div');
-      block.className = 'q';
-
-      const p = document.createElement('p');
-      p.textContent = pregunta; block.appendChild(p);
-
-      const list = document.createElement('div');
-      list.className = 'opts';
-
-      const ans = { value: -1 };
-      opciones.forEach((op, j)=>{
-        const opt = crearOpcion('q'+i, valores[j], op, (v)=> ans.value = v);
-        list.appendChild(opt);
-      });
-
-      respuestas.push(ans);
-      block.appendChild(list);
-      form.appendChild(block);
-    });
-
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    const btn = document.createElement('button');
-    btn.type = 'submit'; btn.className = 'btn'; btn.textContent = 'Siguiente';
-    actions.appendChild(btn);
-    form.appendChild(actions);
-
-    form.onsubmit = (e)=>{
-      e.preventDefault();
-      if(pagina === 0){ nombreProducto = (document.getElementById('nombreProducto').value||'').trim(); }
-      if(respuestas.some(r=> r.value === -1)){
-        alert('Por favor responde todas las preguntas.');
-        return;
-      }
-      puntajes[seccion.clave] = respuestas.map(r=> r.value);
-      pagina++;
-      if(pagina < preguntas.length) cargarPagina();
-      else mostrarResultado();
-    };
-
-    contenedor.appendChild(form);
-  }
-
-  function generarFeedback(clave, respuestasBrutas){
-    const preguntasSeccion = preguntas.find(p=> p.clave===clave).items;
-    const comentarios = [];
-    respuestasBrutas.forEach((valor,i)=>{
-      if(valor >= 1) return; // omitimos respuestas 100% positivas
-      const [pregunta, opciones, valores] = preguntasSeccion[i];
-      const idx = valores.indexOf(valor);
-      const opcionTexto = opciones[idx];
-      const comentario = (retroalimentacion[pregunta]||{})[opcionTexto];
-      if(comentario) comentarios.push(comentario);
-    });
-    return comentarios;
-  }
-
-  function mostrarResultado(){
-    contenedor.innerHTML = '';
-    progressFill.style.width = '100%';
-    progressLabel.textContent = `Paso ${preguntas.length} de ${preguntas.length}`;
-
-    let exitosos = 0;
-
-    const resultados = [
-      ["Nicho", "nicho", "Apto", "No apto"],
-      ["Producto", "producto", "Ganador", "No ganador"],
-      ["Proveedor", "proveedor", "Viable", "No viable"]
-    ];
-
-    const root = document.createElement('div');
-    root.className = 'result';
-
-    const title = document.createElement('div');
-    title.className = 'title';
-    title.textContent = `📦 Resultado para: ${nombreProducto || 'Producto'}`;
-    root.appendChild(title);
-
-    resultados.forEach(([nombre, clave, exito, fallo])=>{
-      const total = puntajes[clave].length;
-      const puntos = puntajes[clave].reduce((a,b)=> a+b, 0);
-      const porcentaje = (puntos / total) * 100;
-      const estado = porcentaje >= 80 ? exito : fallo; // regla original
-      if(estado === exito) exitosos++;
-
-      const section = document.createElement('div');
-      section.className = 'section';
-
-      const h4 = document.createElement('h4');
-      h4.textContent = nombre;
-
-      const badge = document.createElement('span');
-      badge.className = 'badge ' + (porcentaje>=75 ? 'is-green' : porcentaje>=50 ? 'is-yellow' : 'is-red');
-      badge.textContent = `${estado} · ${puntos.toFixed(1)}/${total} – ${porcentaje.toFixed(0)}%`;
-
-      const head = document.createElement('div');
-      head.style.display='flex'; head.style.alignItems='center'; head.style.justifyContent='space-between';
-      head.appendChild(h4); head.appendChild(badge);
-      section.appendChild(head);
-
-      const fb = document.createElement('div');
-      fb.className = 'feedback';
-      const comentarios = generarFeedback(clave, puntajes[clave]);
-      if(comentarios.length){
-        const ul = document.createElement('ul');
-        ul.style.margin='0'; ul.style.paddingLeft='18px';
-        comentarios.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
-        fb.appendChild(ul);
-      }else{
-        fb.textContent = 'No se detectaron áreas de mejora en esta sección.';
-      }
-      section.appendChild(fb);
-
-      root.appendChild(section);
-    });
-
-    const conclusion = document.createElement('div');
-    conclusion.className = 'conclusion ' + (exitosos===3 ? 'is-green' : 'is-yellow');
-    conclusion.textContent = exitosos === 3
-      ? '¡Felicidades! Tu producto cumple con los criterios necesarios para tener éxito en TikTok Shop.'
-      : 'Tu producto necesita mejorar en algunas áreas antes de ser lanzado en TikTok Shop.';
-    root.appendChild(conclusion);
-
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    const restart = document.createElement('button');
-    restart.className = 'btn';
-    restart.textContent = '🔁 Volver a empezar';
-    restart.addEventListener('click', ()=> location.reload());
-    actions.appendChild(restart);
-    root.appendChild(actions);
-
-    contenedor.appendChild(root);
-  }
-
-  // init
-  cargarPagina();
-  </script>
+  <!-- Scripts -->
+  <script src="script.js"></script>
 </body>
+
 </html>
